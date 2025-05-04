@@ -1,0 +1,33 @@
+version: "3.3"
+
+services:
+  db:
+    image: postgres:17.4
+    shm_size: 1g
+    volumes:
+      - ./containers_data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  backend:
+    build: ./backend/
+    command: /bin/bash create_initial_migration.sh
+    volumes:
+      - ./backend/:/code
+      - ./containers_data/static:/var/static
+      - ./containers_data/media:/var/media
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      - db      
+  frontend:
+    build: ./frontend/
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
