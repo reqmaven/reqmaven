@@ -15,14 +15,13 @@ services:
     command: /bin/bash create_initial_migration.sh
     volumes:
       - ./backend/:/code
+      - ./backend_data/:/code/settings
       - ./containers_data/static:/var/static
       - ./containers_data/media:/var/media
     ports:
       - "8000:8000"
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - DJANGO_SETTINGS_MODULE=settings.settings
     depends_on:
       - db      
   frontend:
