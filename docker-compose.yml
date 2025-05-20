@@ -10,6 +10,14 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379
+      
   backend:
     build: ./backend/
     command: /bin/bash create_initial_migration.sh
@@ -18,15 +26,37 @@ services:
       - ./backend_data/:/code/settings
       - ./containers_data/static:/var/static
       - ./containers_data/media:/var/media
+      - ./containers_data/var/tmp:/var/tmp/
+      - ./containers_data/tmp:/tmp/
     ports:
       - "8000:8000"
     environment:
       - DJANGO_SETTINGS_MODULE=settings.settings
     depends_on:
-      - db      
+      - db
+      - redis
+      
   frontend:
     build: ./frontend/
     ports:
       - "8080:80"
+    environment:
+      - API_URL="localhost:4000"
     depends_on:
       - backend
+      
+  celery:
+    build: ./backend/
+    user: "1000:1000"
+    command: ["celery", "-A", "reqman", "worker", "--loglevel=info"]
+    volumes:
+      - ./backend/:/code
+      - ./backend_data/:/code/settings
+      - ./containers_data/static:/var/static
+      - ./containers_data/media:/var/media
+      - ./containers_data/var/tmp:/var/tmp/
+      - ./containers_data/tmp:/tmp/
+    environment:
+      - DJANGO_SETTINGS_MODULE=settings.settings
+    depends_on:
+      - redis

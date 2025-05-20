@@ -12,6 +12,21 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+# Celery settings
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Celery Configuration Options
+CELERY_TIMEZONE = "UTC"
+#CELERY_TASK_TRACK_STARTED = True
+#CELERY_TASK_TIME_LIMIT = 30 * 60
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CORS_ALLOW_ALL_ORIGINS = True
@@ -38,11 +53,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'django_celery_results',
     'rest_framework',
     'rest_framework.authtoken',
     'simple_history',
     'corsheaders',
     'requirements',
+    'celery_progress'
 ]
 
 MIDDLEWARE = [
